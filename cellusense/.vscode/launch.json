@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run CelluSense in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173/",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Start CelluSense server"
+    },
+    {
+      "name": "Run CelluSense in Edge",
+      "type": "msedge",
+      "request": "launch",
+      "url": "http://localhost:5173/",
+      "webRoot": "${workspaceFolder}",
+      "preLaunchTask": "Start CelluSense server"
+    },
+    {
+      "name": "Debug tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["--test", "tests/analysis.test.js", "tests/server.test.js"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}

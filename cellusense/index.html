@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="CelluSense — scan a smart bandage, correct for lighting, and track wound pH and infection risk over time." />
+    <meta name="theme-color" content="#0f766e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CelluSense" />
+    <title>CelluSense · Smart Bandage Scanner</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        const t = JSON.parse(localStorage.getItem("cellusense:v1") || "{}")?.settings?.theme;
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="modulepreload" href="js/analysis.js" />
+    <script type="module" src="js/app.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#scan" aria-label="CelluSense home">
+          <svg viewBox="0 0 48 48" class="brand-mark" aria-hidden="true">
+            <defs>
+              <linearGradient id="bm" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#2dd4bf" />
+                <stop offset="1" stop-color="#0284c7" />
+              </linearGradient>
+            </defs>
+            <rect x="2" y="2" width="44" height="44" rx="13" fill="url(#bm)" />
+            <circle cx="24" cy="24" r="13" fill="none" stroke="#fff" stroke-width="3.5" />
+            <circle cx="24" cy="24" r="6.5" fill="#fff" opacity=".9" />
+          </svg>
+          <span class="brand-text"><strong>CelluSense</strong><small>Smart Bandage Scanner</small></span>
+        </a>
+        <nav class="tabs" aria-label="Main">
+          <a href="#scan" data-tab="scan"><svg class="i"><use href="#i-camera" /></svg><span>Scan</span></a>
+          <a href="#result" data-tab="result"><svg class="i"><use href="#i-pulse" /></svg><span>Results</span></a>
+          <a href="#trends" data-tab="trends"><svg class="i"><use href="#i-chart" /></svg><span>Trends</span></a>
+          <a href="#settings" data-tab="settings"><svg class="i"><use href="#i-sliders" /></svg><span>Settings</span></a>
+        </nav>
+        <button class="patient-chip" id="patient-chip" type="button" title="Change patient">
+          <svg class="i"><use href="#i-user" /></svg><span id="patient-name">Patient</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ============================ SCAN ============================ -->
+      <section class="view" id="view-scan" data-view="scan" aria-labelledby="scan-h">
+        <div class="view-head">
+          <div>
+            <h1 id="scan-h">Scan bandage</h1>
+            <p class="sub">Center the bandage's printed ring inside the circle, then capture.</p>
+          </div>
+        </div>
+
+        <div class="scan-layout">
+          <div class="camera-card">
+            <div class="viewfinder" id="viewfinder">
+              <video id="video" playsinline muted autoplay></video>
+              <svg class="guide" id="guide" aria-hidden="true">
+                <defs>
+                  <mask id="guide-mask">
+                    <rect width="100%" height="100%" fill="#fff" />
+                    <circle id="guide-hole" cx="50%" cy="50%" r="35%" fill="#000" />
+                  </mask>
+                </defs>
+                <rect width="100%" height="100%" fill="rgba(3,7,18,.55)" mask="url(#guide-mask)" />
+                <circle id="guide-ring" class="guide-ring" cx="50%" cy="50%" r="35%" />
+                <circle id="guide-inner" class="guide-inner" cx="50%" cy="50%" r="19%" />
+                <circle id="lock-ring" class="lock-ring" cx="0" cy="0" r="0" />
+              </svg>
+              <div class="vf-status" id="vf-status" role="status">Starting camera…</div>
+              <div class="vf-empty" id="vf-empty" hidden>
+                <svg class="i i-xl"><use href="#i-camera" /></svg>
+                <p id="vf-empty-msg">Camera unavailable</p>
+                <button class="btn btn-soft" id="retry-camera" type="button">Try again</button>
+              </div>
+              <div class="vf-busy" id="vf-busy" hidden><span class="spinner"></span>Analyzing…</div>
+            </div>
+            <div class="capture-bar">
+              <label class="round-btn" title="Upload a photo">
+                <svg class="i"><use href="#i-image" /></svg>
+                <span class="sr-only">Upload photo</span>
+                <input type="file" id="file-input" accept="image/*" hidden />
+              </label>
+              <button class="shutter" id="capture" type="button" aria-label="Capture and analyze">
+                <span></span>
+              </button>
+              <button class="round-btn" id="flip" type="button" title="Switch camera" aria-label="Switch camera">
+                <svg class="i"><use href="#i-flip" /></svg>
+              </button>
+            </div>
+            <div class="capture-extra">
+              <label class="btn btn-ghost btn-sm" id="native-camera">
+                <svg class="i"><use href="#i-camera" /></svg>Use phone camera app
+                <input type="file" id="native-input" accept="image/*" capture="environment" hidden />
+              </label>
+              <button class="btn btn-ghost btn-sm" id="torch" type="button" hidden>
+                <svg class="i"><use href="#i-bolt" /></svg>Light
+              </button>
+            </div>
+          </div>
+
+          <aside class="card demo-card" aria-labelledby="demo-h">
+            <div class="card-title">
+              <svg class="i"><use href="#i-spark" /></svg>
+              <h2 id="demo-h">Demo bandage</h2>
+            </div>
+            <p class="muted">No bandage handy? Generate a simulated CelluSense bandage photo at any pH and lighting — perfect for a live demo.</p>
+            <label class="field">
+              <span class="field-row"><span>Wound pH</span><output id="demo-ph-out">7.8</output></span>
+              <input type="range" id="demo-ph" min="5" max="9" step="0.1" value="7.8" />
+              <div class="scale-hint"><span>5.0 acidic</span><span>9.0 alkaline</span></div>
+            </label>
+            <label class="field">
+              <span>Room lighting</span>
+              <select class="select" id="demo-light"></select>
+            </label>
+            <div class="demo-preview" aria-hidden="true">
+              <span class="swatch" id="demo-swatch"></span>
+              <span id="demo-zone" class="zone-text"></span>
+            </div>
+            <button class="btn btn-primary btn-block" id="demo-scan" type="button">
+              <svg class="i"><use href="#i-scan" /></svg>Scan simulated bandage
+            </button>
+          </aside>
+        </div>
+
+        <ol class="steps" aria-label="How it works">
+          <li><b>1</b><div><strong>Capture</strong><span>Snap the bandage with any phone or tablet.</span></div></li>
+          <li><b>2</b><div><strong>Normalize</strong><span>The printed ring corrects white balance, brightness and shadows.</span></div></li>
+          <li><b>3</b><div><strong>Analyze</strong><span>Index = R<sub>center</sub> / G<sub>center</sub> of the indicator pad.</span></div></li>
+          <li><b>4</b><div><strong>Score</strong><span>pH maps to a risk zone and is logged to the trend chart.</span></div></li>
+        </ol>
+      </section>
+
+      <!-- ============================ RESULT ============================ -->
+      <section class="view" id="view-result" data-view="result" aria-labelledby="result-h" hidden>
+        <div class="view-head">
+          <div>
+            <h1 id="result-h">Diagnostic results</h1>
+            <p class="sub" id="result-time">No scan yet</p>
+          </div>
+          <a class="btn btn-soft" href="#scan"><svg class="i"><use href="#i-camera" /></svg>New scan</a>
+        </div>
+
+        <div class="empty" id="result-empty">
+          <svg class="i i-xl"><use href="#i-pulse" /></svg>
+          <h2>No results yet</h2>
+          <p class="muted">Scan a bandage or try the demo bandage to see a diagnosis.</p>
+          <a class="btn btn-primary" href="#scan">Start a scan</a>
+        </div>
+
+        <div class="result-layout" id="result-body" hidden>
+          <div class="result-main">
+            <article class="card verdict" id="verdict">
+              <div class="verdict-top">
+                <div>
+                  <div class="eyebrow">Calculated pH</div>
+                  <div class="ph-value" id="ph-value">pH 7.8</div>
+                </div>
+                <div class="risk-badge" id="risk-badge">Infection Risk: High</div>
+              </div>
+              <div class="gauge" id="gauge" aria-hidden="true">
+                <div class="gauge-track">
+                  <span class="gz gz-low"></span><span class="gz gz-obs"></span><span class="gz gz-high"></span>
+                </div>
+                <div class="gauge-marker" id="gauge-marker"><span></span></div>
+                <div class="gauge-labels"><span>4.5</span><span>5.5</span><span>6.3</span><span>7.3</span><span>9.0</span></div>
+              </div>
+              <div class="zone-line"><span class="zone-dot"></span><strong id="zone-name">Red Zone</strong><span id="zone-title" class="muted"></span></div>
+            </article>
+
+            <article class="card action-card" id="action-card">
+              <div class="card-title"><svg class="i"><use href="#i-clipboard" /></svg><h2>Recommended action</h2></div>
+              <p class="action-headline" id="action-headline"></p>
+              <ul class="checklist" id="action-list"></ul>
+              <div id="trend-alerts"></div>
+              <p class="disclaimer">Research prototype — not a medical device. Always follow clinical judgement and local protocols.</p>
+            </article>
+
+            <article class="card">
+              <div class="card-title"><svg class="i"><use href="#i-chart" /></svg><h2>pH trend</h2><a class="link" href="#trends">View all</a></div>
+              <div class="chart mini" id="mini-chart"></div>
+            </article>
+          </div>
+
+          <div class="result-side">
+            <article class="card photo-card">
+              <div class="photo-wrap" id="photo-wrap">
+                <canvas id="photo" aria-label="Scanned bandage with detected calibration ring"></canvas>
+              </div>
+              <div class="photo-legend">
+                <span><i class="lg lg-ring"></i>Calibration ring</span>
+                <span><i class="lg lg-pad"></i>Sampled pad</span>
+              </div>
+              <div class="adjust" id="adjust" hidden>
+                <p class="muted small">Drag the circle onto the black ring and match its size.</p>
+                <input type="range" id="adjust-r" min="10" max="100" step="0.5" aria-label="Ring size" />
+                <div class="row gap">
+                  <button class="btn btn-primary btn-sm" id="adjust-apply" type="button">Re-analyze</button>
+                  <button class="btn btn-ghost btn-sm" id="adjust-cancel" type="button">Cancel</button>
+                </div>
+              </div>
+              <div class="row gap wrap" id="photo-actions">
+                <button class="btn btn-soft btn-sm" id="adjust-start" type="button"><svg class="i"><use href="#i-target" /></svg>Adjust ring</button>
+                <button class="btn btn-ghost btn-sm" id="discard" type="button"><svg class="i"><use href="#i-trash" /></svg>Discard scan</button>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-title"><svg class="i"><use href="#i-sun" /></svg><h2>Lighting normalization</h2></div>
+              <div class="swatches">
+                <div><span class="swatch lg-sw" id="sw-raw"></span><small>Pad as captured</small><code id="rgb-raw"></code></div>
+                <svg class="i arrow"><use href="#i-arrow" /></svg>
+                <div><span class="swatch lg-sw" id="sw-corr"></span><small>Pad corrected</small><code id="rgb-corr"></code></div>
+              </div>
+              <dl class="stats" id="stats"></dl>
+              <div class="quality" id="quality"></div>
+            </article>
+
+            <article class="card">
+              <label class="field">
+                <span>Clinical note (optional)</span>
+                <textarea class="input" id="note" rows="2" maxlength="280" placeholder="e.g. Dressing changed, mild redness at incision"></textarea>
+              </label>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================ TRENDS ============================ -->
+      <section class="view" id="view-trends" data-view="trends" aria-labelledby="trends-h" hidden>
+        <div class="view-head">
+          <div>
+            <h1 id="trends-h">Historical trend</h1>
+            <p class="sub" id="trend-sub">pH over time</p>
+          </div>
+          <div class="segmented" id="range" role="group" aria-label="Time range">
+            <button type="button" data-range="1">24 h</button>
+            <button type="button" data-range="7">7 d</button>
+            <button type="button" data-range="30">30 d</button>
+            <button type="button" data-range="0" aria-pressed="true">All</button>
+          </div>
+        </div>
+
+        <div class="kpis" id="kpis"></div>
+
+        <article class="card">
+          <div class="chart" id="trend-chart"></div>
+          <div class="chart-legend">
+            <span><i class="zone-sw z-low"></i>Green · Normal healing (5.5–6.2)</span>
+            <span><i class="zone-sw z-obs"></i>Yellow · Observation (6.3–7.2)</span>
+            <span><i class="zone-sw z-high"></i>Red · Notify care team (≥ 7.3)</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-title">
+            <svg class="i"><use href="#i-list" /></svg><h2>Scan log</h2>
+            <div class="row gap push">
+              <button class="btn btn-ghost btn-sm" id="export-csv" type="button"><svg class="i"><use href="#i-download" /></svg>CSV</button>
+              <button class="btn btn-ghost btn-sm" id="load-demo" type="button"><svg class="i"><use href="#i-spark" /></svg>Demo data</button>
+            </div>
+          </div>
+          <ul class="log" id="log"></ul>
+        </article>
+      </section>
+
+      <!-- ============================ SETTINGS ============================ -->
+      <section class="view" id="view-settings" data-view="settings" aria-labelledby="settings-h" hidden>
+        <div class="view-head">
+          <div>
+            <h1 id="settings-h">Settings</h1>
+            <p class="sub">Patient, calibration and app preferences.</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <article class="card">
+            <div class="card-title"><svg class="i"><use href="#i-user" /></svg><h2>Patient</h2></div>
+            <label class="field">
+              <span>Patient / wound ID</span>
+              <input class="input" id="patient-input" maxlength="40" placeholder="e.g. Bed 12 · Abdominal incision" />
+            </label>
+            <p class="muted small">Scans are tagged with this ID and the trend chart shows one patient at a time.</p>
+            <label class="field">
+              <span>Switch to existing patient</span>
+              <select class="select" id="patient-select"></select>
+            </label>
+          </article>
+
+          <article class="card">
+            <div class="card-title"><svg class="i"><use href="#i-sliders" /></svg><h2>Preferences</h2></div>
+            <div class="toggle-row">
+              <div><strong>Live ring lock</strong><small>Highlight the calibration ring in the camera view.</small></div>
+              <label class="switch"><input type="checkbox" id="opt-live" /><span></span></label>
+            </div>
+            <div class="toggle-row">
+              <div><strong>Auto-capture</strong><small>Capture automatically once the ring is steady for 1 second.</small></div>
+              <label class="switch"><input type="checkbox" id="opt-auto" /><span></span></label>
+            </div>
+            <label class="field">
+              <span>Appearance</span>
+              <select class="select" id="opt-theme">
+                <option value="system">Match system</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label>
+          </article>
+
+          <article class="card span-2">
+            <div class="card-title"><svg class="i"><use href="#i-flask" /></svg><h2>Calibration curve</h2></div>
+            <p class="muted">Maps the lighting-corrected R/G index to pH. Calibrate your own hydrogel batch by scanning squares soaked in buffer solutions of known pH (e.g. vinegar ≈ 5.5, baking soda ≈ 8.5), then add each reading below.</p>
+            <div class="calib">
+              <table class="table" id="curve-table">
+                <thead><tr><th>pH</th><th>R/G index</th><th><span class="sr-only">Remove</span></th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="chart calib-chart" id="curve-chart"></div>
+            </div>
+            <div class="row gap wrap">
+              <button class="btn btn-soft btn-sm" id="curve-add" type="button"><svg class="i"><use href="#i-plus" /></svg>Add point</button>
+              <button class="btn btn-soft btn-sm" id="curve-from-scan" type="button"><svg class="i"><use href="#i-target" /></svg>Add latest scan as known pH…</button>
+              <button class="btn btn-primary btn-sm" id="curve-save" type="button">Save curve</button>
+              <button class="btn btn-ghost btn-sm" id="curve-reset" type="button">Reset to default</button>
+            </div>
+            <p class="form-error" id="curve-error" role="alert"></p>
+          </article>
+
+          <article class="card">
+            <div class="card-title"><svg class="i"><use href="#i-target" /></svg><h2>Reference ring</h2></div>
+            <p class="muted small">Colours of the printed ring as photographed in neutral daylight (0–255).</p>
+            <div class="rgb-grid">
+              <span></span><span>R</span><span>G</span><span>B</span>
+              <span>White</span>
+              <input class="input" type="number" min="1" max="255" id="ref-w0" aria-label="White R" />
+              <input class="input" type="number" min="1" max="255" id="ref-w1" aria-label="White G" />
+              <input class="input" type="number" min="1" max="255" id="ref-w2" aria-label="White B" />
+              <span>Black</span>
+              <input class="input" type="number" min="0" max="254" id="ref-k0" aria-label="Black R" />
+              <input class="input" type="number" min="0" max="254" id="ref-k1" aria-label="Black G" />
+              <input class="input" type="number" min="0" max="254" id="ref-k2" aria-label="Black B" />
+            </div>
+            <div class="row gap">
+              <button class="btn btn-primary btn-sm" id="ref-save" type="button">Save</button>
+              <button class="btn btn-ghost btn-sm" id="ref-reset" type="button">Reset</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-title"><svg class="i"><use href="#i-shield" /></svg><h2>Data &amp; offline</h2></div>
+            <p class="muted small" id="offline-status">Checking offline support…</p>
+            <div class="row gap wrap">
+              <button class="btn btn-soft btn-sm" id="install" type="button" hidden><svg class="i"><use href="#i-download" /></svg>Install app</button>
+              <button class="btn btn-soft btn-sm" id="export-json" type="button">Export backup</button>
+              <label class="btn btn-soft btn-sm">Import backup<input type="file" id="import-json" accept="application/json,.json" hidden /></label>
+              <button class="btn btn-danger btn-sm" id="clear-data" type="button">Delete all data</button>
+            </div>
+            <p class="muted small">Everything stays on this device. Nothing is uploaded.</p>
+          </article>
+
+          <article class="card span-2 about">
+            <div class="card-title"><svg class="i"><use href="#i-info" /></svg><h2>How CelluSense works</h2></div>
+            <div class="about-grid">
+              <div>
+                <h3>The bandage</h3>
+                <p>A carboxymethyl-cellulose hydrogel infused with red-cabbage anthocyanin and turmeric curcumin, cross-linked with citric acid. It stays rosy-purple in acidic, healthy wounds and shifts toward blue/indigo/green as pH rises — an early sign of bacterial infection.</p>
+              </div>
+              <div>
+                <h3>The algorithm</h3>
+                <p>The printed white and black rings have known colours. Comparing what the camera sees to those known values gives a per-channel correction (in linear light) that removes colour casts, brightness changes and shadows. The corrected pad colour gives <code>Index = R<sub>center</sub> / G<sub>center</sub></code>, which the calibration curve converts to pH.</p>
+              </div>
+              <div>
+                <h3>Risk zones</h3>
+                <p><span class="pill z-low">Green</span> pH 5.5–6.2 normal healing · <span class="pill z-obs">Yellow</span> pH 6.3–7.2 flag for observation · <span class="pill z-high">Red</span> pH ≥ 7.3 notify care team.</p>
+              </div>
+            </div>
+            <p class="disclaimer">CelluSense is a student research prototype and is not a certified medical device.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+    <!-- Icon sprite (inline so the app works fully offline) -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <defs>
+        <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z" /><circle cx="12" cy="13" r="3.5" /></symbol>
+        <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4" /></symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18" /><path d="m7 15 4-4 3 3 6-7" /></symbol>
+        <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" /></symbol>
+        <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></symbol>
+        <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" /><circle cx="9" cy="9" r="2" /><path d="m21 15-4-4L5 21" /></symbol>
+        <symbol id="i-flip" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.2L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16" /><path d="M3 21v-5h5" /></symbol>
+        <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></symbol>
+        <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8" /></symbol>
+        <symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" /><circle cx="12" cy="12" r="4" /></symbol>
+        <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="18" rx="2" /><path d="M9 4V3h6v1M9 11l2 2 4-4M9 17h6" /></symbol>
+        <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" /></symbol>
+        <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /></symbol>
+        <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></symbol>
+        <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></symbol>
+        <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" /></symbol>
+        <symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6L4.5 18.5A2 2 0 0 0 6.2 21.5h11.6a2 2 0 0 0 1.7-3L14 9V3" /><path d="M7 15h10" /></symbol>
+        <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+        <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></symbol>
+        <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 16v-4M12 8h.01" /></symbol>
+        <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01" /></symbol>
+        <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol>
+        <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></symbol>
+      </defs>
+    </svg>
+  </body>
+</html>

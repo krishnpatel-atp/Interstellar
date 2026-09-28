@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 210 297">
+  <!-- CelluSense printable calibration ring. Print at 100% (no scaling) on
+       plain white paper. Cut out the centre and place the hydrogel film behind
+       it, or glue a 20 mm hydrogel square in the centre. Geometry must match
+       js/analysis.js GEOMETRY: black 0.90–1.00 R, white 0.62–0.90 R, pad < 0.56 R. -->
+  <text x="105" y="22" text-anchor="middle" font-family="Arial" font-size="7" font-weight="bold">CelluSense calibration ring</text>
+  <text x="105" y="30" text-anchor="middle" font-family="Arial" font-size="3.6">Print at 100% scale · outer diameter 40 mm · keep the white ring clean and flat</text>
+  <g transform="translate(55 90)">
+    <circle r="20" fill="#1e1e1e"/>
+    <circle r="18" fill="#fff"/>
+    <circle r="12.4" fill="#cec8bc"/>
+    <circle r="11.2" fill="#fff" stroke="#999" stroke-width=".2" stroke-dasharray="1 1"/>
+    <text y="1.2" text-anchor="middle" font-family="Arial" font-size="2.6" fill="#777">hydrogel pad</text>
+  </g>
+  <g transform="translate(155 90)">
+    <circle r="20" fill="#1e1e1e"/>
+    <circle r="18" fill="#fff"/>
+    <circle r="12.4" fill="#cec8bc"/>
+    <circle r="11.2" fill="#fff" stroke="#999" stroke-width=".2" stroke-dasharray="1 1"/>
+    <text y="1.2" text-anchor="middle" font-family="Arial" font-size="2.6" fill="#777">hydrogel pad</text>
+  </g>
+  <g transform="translate(55 190)">
+    <circle r="20" fill="#1e1e1e"/>
+    <circle r="18" fill="#fff"/>
+    <circle r="12.4" fill="#cec8bc"/>
+    <circle r="11.2" fill="#fff" stroke="#999" stroke-width=".2" stroke-dasharray="1 1"/>
+    <text y="1.2" text-anchor="middle" font-family="Arial" font-size="2.6" fill="#777">hydrogel pad</text>
+  </g>
+  <g transform="translate(155 190)">
+    <circle r="20" fill="#1e1e1e"/>
+    <circle r="18" fill="#fff"/>
+    <circle r="12.4" fill="#cec8bc"/>
+    <circle r="11.2" fill="#fff" stroke="#999" stroke-width=".2" stroke-dasharray="1 1"/>
+    <text y="1.2" text-anchor="middle" font-family="Arial" font-size="2.6" fill="#777">hydrogel pad</text>
+  </g>
+  <text x="105" y="250" text-anchor="middle" font-family="Arial" font-size="3.6">Tip: after printing, photograph one ring in daylight and enter the white/black values seen</text>
+  <text x="105" y="256" text-anchor="middle" font-family="Arial" font-size="3.6">in Settings → Reference ring, then calibrate with pH 5.5 (vinegar) and pH 8.5 (baking soda) squares.</text>
+</svg>

@@ -1,0 +1,22 @@
+{
+  "name": "cellusense",
+  "version": "1.0.0",
+  "description": "Smart bandage scanner: lighting-normalized R/G colour analysis → wound pH → infection risk, with trend tracking. Offline-capable PWA.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test tests/*.test.js",
+    "icons": "node scripts/make-icons.mjs",
+    "lint": "biome check .",
+    "format": "biome format --write ."
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4"
+  }
+}

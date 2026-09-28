@@ -1,0 +1,9 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "biomejs.biome",
+  "[html]": { "editor.defaultFormatter": "vscode.html-language-features" },
+  "editor.codeActionsOnSave": { "quickfix.biome": "explicit" },
+  "files.associations": { "*.webmanifest": "json" },
+  "search.exclude": { "**/node_modules": true },
+  "javascript.preferences.importModuleSpecifierEnding": "js"
+}
