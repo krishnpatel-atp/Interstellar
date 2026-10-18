@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "CelluSense",
+    "slug": "cellusense",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#f4f7fb",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "CelluSense uses the camera to scan the smart bandage.",
+        "NSPhotoLibraryUsageDescription": "CelluSense can analyze a bandage photo from your library."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0d9488",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": ["android.permission.CAMERA"]
+    },
+    "plugins": [
+      ["expo-camera", { "cameraPermission": "CelluSense uses the camera to scan the smart bandage." }],
+      ["expo-image-picker", { "photosPermission": "CelluSense can analyze a bandage photo from your library." }]
+    ],
+    "web": { "favicon": "./assets/favicon.png" }
+  }
+}

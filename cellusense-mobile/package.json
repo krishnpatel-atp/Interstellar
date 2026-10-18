@@ -1,0 +1,27 @@
+{
+  "name": "cellusense-mobile",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "~58.0.14",
+    "expo-camera": "~58.0.10",
+    "expo-file-system": "~58.0.9",
+    "expo-image-manipulator": "~58.0.14",
+    "expo-image-picker": "~58.0.10",
+    "expo-status-bar": "~58.0.3",
+    "jpeg-js": "^0.4.4",
+    "react": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-svg": "15.16.0"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "test": "node --test tests/pipeline.test.mjs"
+  },
+  "private": true
+}
