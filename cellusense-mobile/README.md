@@ -39,7 +39,7 @@ instantly** (Fast Refresh). Shake the phone to open the Expo menu.
 
 ### Beta testing with friends / teammates
 
-- **Live session (easiest):** run the *tunnel* task and send testers a screenshot of the
+- **Live session (easiest):** run the *tunnel* task (it asks you to `npx expo login` once — SDK 58 tunnels need your Expo account) and send testers a screenshot of the
   QR code. They install Expo Go (SDK 58) and scan it. It works from anywhere, as long as
   your laptop keeps the task running.
 - **Without your laptop running:** publish with EAS Update:

@@ -3,29 +3,50 @@
   "tasks": [
     {
       "label": "Expo Go: start (same Wi-Fi)",
-      "detail": "Shows the QR code — scan it with Expo Go (Android) or the Camera app (iPhone).",
+      "detail": "Shows the QR code \u2014 scan it with Expo Go (Android) or the Camera app (iPhone).",
       "type": "shell",
       "command": "npx expo start",
       "isBackground": true,
-      "group": { "kind": "build", "isDefault": true },
-      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
       "problemMatcher": {
         "owner": "expo",
-        "pattern": { "regexp": "^__never__$" },
-        "background": { "beginsPattern": "Starting", "endsPattern": "Metro waiting on|Waiting on" }
+        "pattern": {
+          "regexp": "^__never__$"
+        },
+        "background": {
+          "beginsPattern": "Starting",
+          "endsPattern": "Metro waiting on|Waiting on"
+        }
       }
     },
     {
       "label": "Expo Go: start with tunnel (any network / remote testers)",
-      "detail": "Works on school Wi-Fi and lets testers anywhere scan the QR while this stays running.",
+      "detail": "Logs you in to Expo (required for tunnels on SDK 58), then starts a tunnel so any network works.",
       "type": "shell",
-      "command": "npx expo start --tunnel",
+      "command": "npx expo whoami || npx expo login; npx expo start --tunnel",
       "isBackground": true,
-      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
       "problemMatcher": {
         "owner": "expo",
-        "pattern": { "regexp": "^__never__$" },
-        "background": { "beginsPattern": "Starting", "endsPattern": "Metro waiting on|Waiting on|Tunnel ready" }
+        "pattern": {
+          "regexp": "^__never__$"
+        },
+        "background": {
+          "beginsPattern": "Starting",
+          "endsPattern": "Metro waiting on|Waiting on|Tunnel ready"
+        }
       }
     },
     {
@@ -34,7 +55,11 @@
       "type": "shell",
       "command": "npx expo start --clear",
       "isBackground": true,
-      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": true
+      },
       "problemMatcher": []
     },
     {
