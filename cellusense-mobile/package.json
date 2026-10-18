@@ -18,10 +18,16 @@
   },
   "scripts": {
     "start": "expo start",
+    "start:tunnel": "expo start --tunnel",
+    "start:clear": "expo start --clear",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web",
-    "test": "node --test tests/pipeline.test.mjs"
+    "doctor": "expo-doctor",
+    "test": "node --test tests/pipeline.test.mjs",
+    "beta:publish": "eas update --branch beta --message \"Beta build\""
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@expo/ngrok": "^4.1.3"
+  }
 }

@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug app in Expo Go",
+      "type": "expo",
+      "request": "attach",
+      "projectRoot": "${workspaceFolder}",
+      "bundlerPort": "8081",
+      "bundlerHost": "127.0.0.1",
+      "preLaunchTask": "Expo Go: start (same Wi-Fi)"
+    }
+  ]
+}

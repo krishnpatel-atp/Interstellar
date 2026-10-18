@@ -21,12 +21,27 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "permissions": ["android.permission.CAMERA"]
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "plugins": [
-      ["expo-camera", { "cameraPermission": "CelluSense uses the camera to scan the smart bandage." }],
-      ["expo-image-picker", { "photosPermission": "CelluSense can analyze a bandage photo from your library." }]
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "CelluSense uses the camera to scan the smart bandage."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CelluSense can analyze a bandage photo from your library."
+        }
+      ]
     ],
-    "web": { "favicon": "./assets/favicon.png" }
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "owner": "krishnpatel1234"
   }
 }

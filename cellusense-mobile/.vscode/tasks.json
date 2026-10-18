@@ -1,0 +1,60 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Expo Go: start (same Wi-Fi)",
+      "detail": "Shows the QR code — scan it with Expo Go (Android) or the Camera app (iPhone).",
+      "type": "shell",
+      "command": "npx expo start",
+      "isBackground": true,
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "problemMatcher": {
+        "owner": "expo",
+        "pattern": { "regexp": "^__never__$" },
+        "background": { "beginsPattern": "Starting", "endsPattern": "Metro waiting on|Waiting on" }
+      }
+    },
+    {
+      "label": "Expo Go: start with tunnel (any network / remote testers)",
+      "detail": "Works on school Wi-Fi and lets testers anywhere scan the QR while this stays running.",
+      "type": "shell",
+      "command": "npx expo start --tunnel",
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "problemMatcher": {
+        "owner": "expo",
+        "pattern": { "regexp": "^__never__$" },
+        "background": { "beginsPattern": "Starting", "endsPattern": "Metro waiting on|Waiting on|Tunnel ready" }
+      }
+    },
+    {
+      "label": "Expo Go: start and clear cache",
+      "detail": "Use if the app shows old code or a strange red error screen.",
+      "type": "shell",
+      "command": "npx expo start --clear",
+      "isBackground": true,
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Install dependencies",
+      "type": "shell",
+      "command": "npm install",
+      "problemMatcher": []
+    },
+    {
+      "label": "Run tests",
+      "type": "shell",
+      "command": "npm test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Check project health (expo-doctor)",
+      "type": "shell",
+      "command": "npx expo-doctor",
+      "problemMatcher": []
+    }
+  ]
+}
