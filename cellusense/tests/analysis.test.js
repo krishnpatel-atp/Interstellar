@@ -178,3 +178,27 @@ describe("camera-to-data pipeline on simulated photos", () => {
     assert.ok(Math.abs(res.ph - 6.5) < 0.1);
   });
 });
+
+describe("health-record export", async () => {
+  const { toFhirBundle } = await import("../js/fhir.js");
+  test("builds a valid FHIR R4 bundle of pH observations", () => {
+    const bundle = toFhirBundle(
+      [
+        { id: "a1", ts: Date.UTC(2026, 9, 1), patient: "Bed 12", ph: 7.84, ratio: 0.61, note: "redness" },
+        { id: "a2", ts: Date.UTC(2026, 9, 2), patient: "Bed 12", ph: 5.9, ratio: 2.3 },
+      ],
+      { patient: "Bed 12" },
+    );
+    assert.equal(bundle.resourceType, "Bundle");
+    assert.equal(bundle.entry.length, 2);
+    const [o1, o2] = bundle.entry.map(e => e.resource);
+    assert.equal(o1.resourceType, "Observation");
+    assert.equal(o1.valueQuantity.value, 7.8);
+    assert.equal(o1.valueQuantity.code, "[pH]");
+    assert.equal(o1.interpretation[0].coding[0].code, "H");
+    assert.equal(o2.interpretation[0].coding[0].code, "N");
+    assert.equal(o1.effectiveDateTime, "2026-10-01T00:00:00.000Z");
+    assert.deepEqual(o1.note, [{ text: "redness" }]);
+    assert.equal(o2.note, undefined);
+  });
+});

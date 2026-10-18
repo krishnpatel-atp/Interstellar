@@ -1,6 +1,6 @@
 // Offline-first service worker: the whole app is cached on first visit so a
 // live demo never depends on Wi-Fi.
-const VERSION = "cellusense-v1.0.0";
+const VERSION = "cellusense-v1.1.0";
 const ASSETS = [
   "./",
   "index.html",
@@ -11,6 +11,7 @@ const ASSETS = [
   "js/camera.js",
   "js/chart.js",
   "js/demo.js",
+  "js/fhir.js",
   "js/store.js",
   "js/worker.js",
   "icons/icon.svg",

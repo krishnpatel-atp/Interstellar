@@ -13,6 +13,7 @@ import {
 import { Camera } from "./camera.js";
 import { curveChart, trendChart } from "./chart.js";
 import { LIGHTING } from "./demo.js";
+import { toFhirBundle } from "./fhir.js";
 import { store, uid, validReference } from "./store.js";
 
 const $ = sel => document.querySelector(sel);
@@ -1011,6 +1012,21 @@ const trendsView = (() => {
       e.preventDefault();
       openScan(li.dataset.id);
     }
+  });
+
+  $("#export-fhir").addEventListener("click", () => {
+    const scans = store.scansFor();
+    if (!scans.length) {
+      toast("No scans to export yet.");
+      return;
+    }
+    const bundle = toFhirBundle(scans, { patient: store.settings.patient });
+    download(
+      `cellusense-${store.settings.patient.replace(/[^\w-]+/g, "_")}-fhir.json`,
+      JSON.stringify(bundle, null, 2),
+      "application/fhir+json",
+    );
+    toast(`Exported ${scans.length} time-stamped readings in FHIR R4 format.`, { kind: "success" });
   });
 
   $("#export-csv").addEventListener("click", () => {

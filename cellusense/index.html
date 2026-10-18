@@ -168,7 +168,7 @@
             <article class="card verdict" id="verdict">
               <div class="verdict-top">
                 <div>
-                  <div class="eyebrow">Calculated pH</div>
+                  <div class="eyebrow">Estimated pH</div>
                   <div class="ph-value" id="ph-value">pH 7.8</div>
                 </div>
                 <div class="risk-badge" id="risk-badge">Infection Risk: High</div>
@@ -272,6 +272,7 @@
             <svg class="i"><use href="#i-list" /></svg><h2>Scan log</h2>
             <div class="row gap push">
               <button class="btn btn-ghost btn-sm" id="export-csv" type="button"><svg class="i"><use href="#i-download" /></svg>CSV</button>
+              <button class="btn btn-ghost btn-sm" id="export-fhir" type="button" title="Export as an HL7 FHIR R4 bundle for electronic health records"><svg class="i"><use href="#i-shield" /></svg>Health record</button>
               <button class="btn btn-ghost btn-sm" id="load-demo" type="button"><svg class="i"><use href="#i-spark" /></svg>Demo data</button>
             </div>
           </div>

@@ -39,7 +39,8 @@ export const DEFAULT_REFERENCE = Object.freeze({
 
 /**
  * Colour of the anthocyanin/curcumin indicator (under reference light) vs pH.
- * Rosy-purple when acidic, shifting to blue/indigo and green when alkaline.
+ * Matches the deck: rosy-purple (5.5) → deep lavender (6.8) → indigo-blue (7.5)
+ * → dark olive-green (8.5+). Replace via Settings → Calibration for a real batch.
  */
 export const INDICATOR_COLORS = Object.freeze([
   [5.0, [200, 72, 140]],
@@ -49,8 +50,8 @@ export const INDICATOR_COLORS = Object.freeze([
   [7.0, [117, 86, 170]],
   [7.5, [92, 96, 170]],
   [8.0, [72, 110, 160]],
-  [8.5, [58, 124, 142]],
-  [9.0, [52, 134, 118]],
+  [8.5, [70, 118, 82]],
+  [9.0, [66, 124, 70]],
 ]);
 
 /** Default calibration curve: pH ↔ R/G index derived from the colours above. */

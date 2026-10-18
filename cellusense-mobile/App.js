@@ -8,6 +8,7 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -31,6 +32,7 @@ import {
   validateCurve,
 } from "./src/analysis.js";
 import { TrendChart } from "./src/TrendChart.js";
+import { toFhirBundle } from "./src/fhir.js";
 import { LIGHTING, renderBandage } from "./src/demo.js";
 import { loadPixels } from "./src/image.js";
 import { DEFAULT_SETTINGS, loadState, saveState, uid } from "./src/store.js";
@@ -422,7 +424,7 @@ function ResultScreen({ scan, history, onOpen, onNote, onDiscard, onScan }) {
       </Text>
 
       <Card style={{ borderTopWidth: 5, borderTopColor: tone.bar }}>
-        <Text style={styles.eyebrow}>CALCULATED PH</Text>
+        <Text style={styles.eyebrow}>ESTIMATED PH</Text>
         <Text style={styles.phValue}>pH {scan.ph.toFixed(1)}</Text>
         <View style={[styles.badge, { backgroundColor: tone.bg }]}>
           <View style={[styles.dot, { backgroundColor: tone.fg }]} />
@@ -622,6 +624,20 @@ function TrendsScreen({ patient, scans, onOpen, onDemo, onDelete }) {
           <Text style={styles.h2}>Scan log</Text>
           <Btn title="Load demo data" onPress={onDemo} small />
         </View>
+        {!!shown.length && (
+          <View style={{ marginTop: 10 }}>
+            <Btn
+              title="Send to health record (FHIR)"
+              small
+              onPress={() =>
+                Share.share({
+                  title: `CelluSense — ${patient}`,
+                  message: JSON.stringify(toFhirBundle(shown, { patient }), null, 2),
+                }).catch(() => {})
+              }
+            />
+          </View>
+        )}
         {!shown.length && <Text style={[styles.muted, { marginTop: 8 }]}>No scans yet.</Text>}
         {[...shown].reverse().map(s => {
           const z = classifyRisk(s.ph);
